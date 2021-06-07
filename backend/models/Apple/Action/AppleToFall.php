@@ -4,7 +4,7 @@ namespace backend\models\Apple\Action;
 
 use backend\models\Apple\AppleRecord;
 
-class AppleToFall
+class AppleToFall implements Eat
 {
     protected $apple;
 
@@ -17,20 +17,16 @@ class AppleToFall
         $this->apple = $apple;
     }
 
-    public function getTimeExpires()
+    public function eat($pieceSize)
     {
-        $end = $this->apple->getDateFall() + (3600 * 5);
-        return $end - $this->apple->getDateFall();
-    }
-
-    public function eat($sizePiece)
-    {
-        $this->apple->eat($sizePiece);
+        $this->apple->eat($pieceSize);
         $this->apple->save();
     }
 
-    public function isFresh()
+    public function throwRot()
     {
-        return $this->apple->isFresh();
+        if ($this->apple->getTimeExpires() <= 0) {
+            $this->apple->rot();
+        }
     }
 }

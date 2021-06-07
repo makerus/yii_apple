@@ -3,6 +3,7 @@
 namespace backend\models\Apple;
 
 use backend\models\Apple\Exception\AppleEatenException;
+use backend\models\Apple\Exception\AppleNotFallException;
 use backend\models\Apple\Exception\ToBigPieceException;
 use backend\models\Apple\Exception\ToRottenException;
 use yii\db\ActiveRecord;
@@ -67,6 +68,7 @@ class AppleRecord extends ActiveRecord
     {
         $this->setStatus(AppleStatus::STATUS_FALL);
         $this->dateFall = time();
+        $this->save();
     }
 
     public function setUserId($userId)
@@ -116,6 +118,12 @@ class AppleRecord extends ActiveRecord
         $this->size -= $sizePeace;
         $this->save();
 
+    }
+
+    public function getTimeExpires()
+    {
+        $end = $this->getDateFall() + (3600 * 5);
+        return $end - time();
     }
 
 

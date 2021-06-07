@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\models\Apple\Action\AppleToFall;
 use backend\models\Apple\AppleActionFactory;
 use backend\models\Apple\AppleRecord;
 use backend\models\Apple\Exception\AppleEatenException;
@@ -42,7 +43,17 @@ class AppleController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('form');
+        $user = \Yii::$app->getUser();
+        $apples = AppleRecord::find()->where('user_id = '.$user->getId())->andWhere('fresh = true')->andWhere('size > 0')->all();
+
+        foreach ($apples as $apple) {
+            $factory = AppleActionFactory::getAction($apple);
+            if ($factory instanceof AppleToFall) {
+                $factory->throwRot();
+            }
+        }
+
+        return $this->render('index', ['data' => $apples]);
     }
 
     public function actionGenerate()
@@ -69,10 +80,10 @@ class AppleController extends Controller
         if ($someElement) {
             foreach ($someElement[0] as $apple) {
                 /** @var AppleRecord $apple */
-                $apple->rot();
+                $apple->fall();
             }
 
-            return $this->asJson(['fallApples' => count($someElement[0])]);
+            return $this->asJson(['success' => 'Вы потрясли дерево и с него упало ' . count($someElement[0]) . ' яблока!']);
         } else {
             return $this->asJson(['error' => 'Яблоки, к сожалению закончились. Нужно вырастить новые...']);
         }
@@ -80,23 +91,26 @@ class AppleController extends Controller
 
     public function actionEatApple()
     {
-        if ($this->request->get('apple_id', false) and $this->request->get('size', false)) {
-            $appleId = $this->request->get('apple_id');
-            $pieceSize = $this->request->get('size');
+        if ($this->request->post('apple_id', false) and $this->request->post('size', false)) {
+            $appleId = $this->request->post('apple_id');
+            $pieceSize = $this->request->post('size');
 
             /** @var AppleRecord $apple */
             $apple = AppleRecord::findOne(['id' => $appleId]);
 
             if($apple) {
                 try {
-                    $apple->eat($pieceSize);
+
+                    $action = AppleActionFactory::getAction($apple);
+                    $action->eat($pieceSize);
+
                     return $this->asJson(['success' => 'Вы откусили ' . $pieceSize . ', у вас осталось: ' . $apple->getSize() . '% яблока']);
-                } catch (ToBigPieceException | ToRottenException | AppleEatenException $exception) {
+                } catch (\Throwable $exception) {
                     return $this->asJson(['error' => $exception->getMessage()]);
                 }
             }
 
-            return $this->asJson(['error' => 'Это яблочко не было найдено, возможно введены некорректные данные']);
+            return $this->asJson(['error' => 'Это яблочко не было найдено, возможно введены некорректные данные.']);
         } else {
             return $this->asJson(['error' => 'Что-то пошло не так, отсутствуют необходимые параметры.']);
         }

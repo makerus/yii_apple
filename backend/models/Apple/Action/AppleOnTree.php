@@ -4,8 +4,9 @@ namespace backend\models\Apple\Action;
 
 use backend\models\Apple\AppleActionFactory;
 use backend\models\Apple\AppleRecord;
+use backend\models\Apple\Exception\AppleNotFallException;
 
-class AppleOnTree
+class AppleOnTree implements Eat
 {
     protected $apple;
 
@@ -27,4 +28,8 @@ class AppleOnTree
     }
 
 
+    public function eat($pieceSize)
+    {
+        throw new AppleNotFallException();
+    }
 }
