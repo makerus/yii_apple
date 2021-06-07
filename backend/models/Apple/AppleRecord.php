@@ -2,6 +2,7 @@
 
 namespace backend\models\Apple;
 
+use backend\models\Apple\Exception\AppleEatenException;
 use backend\models\Apple\Exception\ToBigPieceException;
 use backend\models\Apple\Exception\ToRottenException;
 use yii\db\ActiveRecord;
@@ -21,6 +22,11 @@ use yii\db\ActiveRecord;
 
 class AppleRecord extends ActiveRecord
 {
+    public static function tableName()
+    {
+        return 'apple';
+    }
+
 
     public function getColor()
     {
@@ -76,6 +82,7 @@ class AppleRecord extends ActiveRecord
     public function rot()
     {
         $this->fresh = false;
+        $this->save();
     }
 
     public function createdOnTree()
@@ -94,30 +101,21 @@ class AppleRecord extends ActiveRecord
 
     public function eat($sizePeace)
     {
+        if ($this->size === 0) {
+            throw new AppleEatenException();
+        }
+
         if ($this->size - $sizePeace < 0) {
             throw new ToBigPieceException();
         }
 
-        if ($this->isFresh()) {
-            $this->size -= $sizePeace;
+        if (!$this->isFresh()) {
+            throw new ToRottenException();
         }
 
-        throw new ToRottenException();
+        $this->size -= $sizePeace;
+        $this->save();
 
-    }
-
-    public function randomCountCreate($min, $max)
-    {
-        $user = \Yii::$app->getUser();
-        $this::deleteAll(['user_id' => $user->getId()]);
-
-        $count = random_int($min, $max);
-        for($index = 0; $index > $count; $index++) {
-            $apple = new self();
-            $apple->setColor('red');
-            $apple->createdOnTree();
-            $apple->save();
-        }
     }
 
 
