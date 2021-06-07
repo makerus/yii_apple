@@ -35,11 +35,18 @@ $provider = new \yii\data\ArrayDataProvider([
                             'color',
                             ['attribute' => 'dateCreated', 'format' => ['date', 'php:Y-m-d']],
                             ['attribute' => 'dateFall', 'format' => ['date', 'php:Y-m-d']],
-                            'status',
+                            ['attribute' => 'status', 'content' => function($data) {
+                                switch ($data->getStatus()) {
+                                    case \backend\models\Apple\AppleStatus::STATUS_ON_TREE: return 'On tree';
+                                    case \backend\models\Apple\AppleStatus::STATUS_FALL: return 'On ground';
+                                    default: return 'nowhere';
+                                }
+                            }],
                             'size',
                             ['attribute' => 'fresh', 'format' => 'boolean'],
                             [
                                 'class' => 'yii\grid\ActionColumn',
+                                'header' => 'Action',
                                 'template' => '{eat}',
                                 'buttons' => [
                                     'eat' => function ($url, $model, $key) {

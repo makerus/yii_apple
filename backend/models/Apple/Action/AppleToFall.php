@@ -4,7 +4,7 @@ namespace backend\models\Apple\Action;
 
 use backend\models\Apple\AppleRecord;
 
-class AppleToFall implements Eat
+class AppleToFall implements Eat, Rotten
 {
     protected $apple;
 
@@ -23,7 +23,7 @@ class AppleToFall implements Eat
         $this->apple->save();
     }
 
-    public function throwRot()
+    public function rot()
     {
         if ($this->apple->getTimeExpires() <= 0) {
             $this->apple->rot();

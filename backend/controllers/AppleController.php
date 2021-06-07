@@ -48,8 +48,9 @@ class AppleController extends Controller
 
         foreach ($apples as $apple) {
             $factory = AppleActionFactory::getAction($apple);
-            if ($factory instanceof AppleToFall) {
-                $factory->throwRot();
+            try {
+                $factory->rot();
+            } catch (\Throwable $exception) {
             }
         }
 

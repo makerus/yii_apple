@@ -29,7 +29,9 @@ class AppleActionFactory
         for($index = 0; $index < $count; $index++) {
             $apple = new AppleRecord();
             $apple->setUserId($user->getId());
-            $apple->setColor('red');
+            $listColor = ['red', 'deep-red', 'green', 'red-green'];
+            shuffle($listColor);
+            $apple->setColor($listColor[0]);
             $apple->createdOnTree();
             $apple->save();
 
