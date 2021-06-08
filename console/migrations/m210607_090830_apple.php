@@ -13,7 +13,7 @@ class m210607_090830_apple extends Migration
         $this->createTable('apple', [
             'id' => $this->primaryKey(),
             'user_id' => $this->integer(),
-            'color' => $this->string()->defaultValue('red'),
+            'color' => $this->string(100),
             'dateCreated' => $this->integer(),
             'dateFall' => $this->integer(),
             'status' => $this->integer(),

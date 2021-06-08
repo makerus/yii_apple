@@ -2,10 +2,10 @@
 
 namespace backend\models\Apple\Action;
 
-use backend\models\Apple\AppleActionFactory;
 use backend\models\Apple\AppleRecord;
 use backend\models\Apple\Exception\AppleNotFallException;
-use backend\models\Apple\Exception\NotRottenOnTreeException;
+use backend\models\Apple\Exception\AppleNotRottenOnTreeException;
+use backend\models\Apple\Factory\AppleActionFactory;
 
 class AppleOnTree implements Eat, Rotten
 {
@@ -36,6 +36,11 @@ class AppleOnTree implements Eat, Rotten
 
     public function rot()
     {
-        throw new NotRottenOnTreeException();
+        throw new AppleNotRottenOnTreeException();
+    }
+
+    public function canRotten()
+    {
+        return false;
     }
 }

@@ -6,7 +6,7 @@ namespace backend\models\Apple\Exception;
 
 use Throwable;
 
-class ToRottenException extends \LogicException
+class AppleRottenException extends \LogicException
 {
     public function __construct($code = 0, Throwable $previous = null)
     {

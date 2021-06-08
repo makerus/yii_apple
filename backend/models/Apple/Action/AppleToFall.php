@@ -3,6 +3,7 @@
 namespace backend\models\Apple\Action;
 
 use backend\models\Apple\AppleRecord;
+use backend\models\Apple\Exception\TryEatNothingException;
 
 class AppleToFall implements Eat, Rotten
 {
@@ -19,14 +20,20 @@ class AppleToFall implements Eat, Rotten
 
     public function eat($pieceSize)
     {
+        if (intval($pieceSize) === 0) {
+            throw new TryEatNothingException();
+        }
         $this->apple->eat($pieceSize);
         $this->apple->save();
     }
 
     public function rot()
     {
-        if ($this->apple->getTimeExpires() <= 0) {
-            $this->apple->rot();
-        }
+        $this->apple->rot();
+    }
+
+    public function canRotten()
+    {
+        return $this->apple->getTimeExpires() <= 0;
     }
 }

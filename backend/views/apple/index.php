@@ -4,12 +4,14 @@
 
 /* @var $data array */
 
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use backend\assets\AppAsset;
+use backend\helpers\FormGeneration;
+use backend\models\Apple\AppleStatus;
+use yii\data\ArrayDataProvider;
 
-$this->title = 'Яблочки, яблочки';
+$this->title = 'Яблочки, яблочки...';
 
-$provider = new \yii\data\ArrayDataProvider([
+$provider = new ArrayDataProvider([
     'allModels' => $data,
     'sort' => [
         'attributes' => ['id', 'dateCreated', 'dateFall', 'fresh']
@@ -18,6 +20,11 @@ $provider = new \yii\data\ArrayDataProvider([
         'pageSize' => 5,
     ],
 ]);
+
+$asset = $this->getAssetManager();
+$bundle = $asset->getBundle(AppAsset::class);
+$bundle->js[] = 'js/manage.js';
+$bundle->publish($asset);
 
 ?>
 
@@ -35,22 +42,30 @@ $provider = new \yii\data\ArrayDataProvider([
                             'color',
                             ['attribute' => 'dateCreated', 'format' => ['date', 'php:Y-m-d']],
                             ['attribute' => 'dateFall', 'format' => ['date', 'php:Y-m-d']],
-                            ['attribute' => 'status', 'content' => function($data) {
-                                switch ($data->getStatus()) {
-                                    case \backend\models\Apple\AppleStatus::STATUS_ON_TREE: return 'On tree';
-                                    case \backend\models\Apple\AppleStatus::STATUS_FALL: return 'On ground';
-                                    default: return 'nowhere';
+
+                            ['attribute' => 'status', 'content' => function($model) {
+                                switch ($model->getStatus()) {
+                                    case AppleStatus::STATUS_ON_TREE: return 'На дереве';
+                                    case AppleStatus::STATUS_FALL: return 'На земле';
+                                    default: return 'У хацкера в руках!';
                                 }
                             }],
-                            'size',
+
+                            ['attribute' => 'size', 'content' => function($model) {
+                                 if ($model->getSize() === 1.0) {
+                                     return 'Целое';
+                                }
+                                 return $model->getSize() . '%';
+                            }],
+
                             ['attribute' => 'fresh', 'format' => 'boolean'],
                             [
                                 'class' => 'yii\grid\ActionColumn',
                                 'header' => 'Action',
-                                'template' => '{eat}',
+                                'template' => '{take}',
                                 'buttons' => [
-                                    'eat' => function ($url, $model, $key) {
-                                        return '<div class="form-group">' . Html::input('text', null, null, ['placeholder' => 'Сколько хотите съесть?', 'class'=>'form-control', 'id' => $model->id]) . '</div>' . Html::a('Съесть', '#', ['onclick' => 'eatApple(' . $model->id . ');', 'class' => 'btn btn-primary']);
+                                    'take' => function ($url, $model) {
+                                        return FormGeneration::getFormAppleTake($model);
                                     }
                                 ]
                             ]
@@ -69,10 +84,3 @@ $provider = new \yii\data\ArrayDataProvider([
             </div>
         </div>
     </div>
-
-<?php
-
-$asset = $this->getAssetManager();
-$bundle = $asset->getBundle(\backend\assets\AppAsset::class);
-$bundle->js[] = 'js/manage.js';
-$bundle->publish($asset);

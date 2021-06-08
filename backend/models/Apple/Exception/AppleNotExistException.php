@@ -6,7 +6,7 @@ namespace backend\models\Apple\Exception;
 
 use Throwable;
 
-class AppleEatenException extends \LogicException
+class AppleNotExistException extends \LogicException
 {
     public function __construct($code = 0, Throwable $previous = null)
     {

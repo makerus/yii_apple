@@ -2,11 +2,12 @@
 
 namespace backend\models\Apple;
 
-use backend\models\Apple\Exception\AppleEatenException;
+use backend\models\Apple\Exception\AppleNotExistException;
 use backend\models\Apple\Exception\AppleNotFallException;
-use backend\models\Apple\Exception\ToBigPieceException;
-use backend\models\Apple\Exception\ToRottenException;
+use backend\models\Apple\Exception\BigPieceException;
+use backend\models\Apple\Exception\AppleRottenException;
 use yii\db\ActiveRecord;
+use yii\helpers\Html;
 
 /**
  * Class AppleRecord
@@ -20,14 +21,12 @@ use yii\db\ActiveRecord;
  * @property integer $size
  * @property bool $fresh
  */
-
 class AppleRecord extends ActiveRecord
 {
     public static function tableName()
     {
         return 'apple';
     }
-
 
     public function getColor()
     {
@@ -66,19 +65,9 @@ class AppleRecord extends ActiveRecord
 
     public function fall()
     {
-        $this->setStatus(AppleStatus::STATUS_FALL);
+        $this->status = AppleStatus::STATUS_FALL;
         $this->dateFall = time();
         $this->save();
-    }
-
-    public function setUserId($userId)
-    {
-        $this->user_id = $userId;
-    }
-
-    public function setColor(string $color)
-    {
-        $this->color = $color;
     }
 
     public function rot()
@@ -87,35 +76,32 @@ class AppleRecord extends ActiveRecord
         $this->save();
     }
 
-    public function createdOnTree()
+    public function growOnTree($userId, $color)
     {
         $this->dateFall = 0;
         $this->dateCreated = time();
         $this->fresh = true;
-        $this->setStatus(AppleStatus::STATUS_ON_TREE);
+        $this->user_id = $userId;
+        $this->status = AppleStatus::STATUS_ON_TREE;
         $this->size = 100;
+        $this->color = $color;
     }
 
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    public function eat($sizePeace)
+    public function eat($pieceSize)
     {
         if ($this->size === 0) {
-            throw new AppleEatenException();
+            throw new AppleNotExistException();
         }
 
-        if ($this->size - $sizePeace < 0) {
-            throw new ToBigPieceException();
+        if ($this->size - $pieceSize < 0) {
+            throw new BigPieceException();
         }
 
         if (!$this->isFresh()) {
-            throw new ToRottenException();
+            throw new AppleRottenException();
         }
 
-        $this->size -= $sizePeace;
+        $this->size -= $pieceSize;
         $this->save();
 
     }
@@ -127,4 +113,25 @@ class AppleRecord extends ActiveRecord
     }
 
 
+    public static function getFreshAndEntire($userId)
+    {
+        return AppleRecord::find()->where('user_id = ' . $userId)
+            ->andWhere('fresh = true')
+            ->andWhere('size > 0')
+            ->all();
+    }
+
+    public static function getColorSet(): array
+    {
+        return [
+            'красное',
+            'красно-зеленое',
+            'зеленоватое',
+            'изумрудное',
+            'рубиновое',
+            'розовое',
+            'белое',
+            'бело-розовое'
+        ];
+    }
 }

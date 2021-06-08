@@ -6,7 +6,7 @@ namespace backend\models\Apple\Exception;
 
 use Throwable;
 
-class ToBigPieceException extends \InvalidArgumentException
+class BigPieceException extends \InvalidArgumentException
 {
     public function __construct($code = 0, Throwable $previous = null)
     {

@@ -17,7 +17,7 @@ services:
       - ./:/app
 
   mysql_dev:
-    image: mysql:5.7
+    image: mariadb
     environment:
       - MYSQL_ROOT_PASSWORD=apple_worm
       - MYSQL_DATABASE=apple_dev
